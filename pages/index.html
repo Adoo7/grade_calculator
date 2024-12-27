@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grade Calculator</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Grade Calculator</h1>
+  <form id="gradeForm">
+    <div id="semestersContainer"></div>
+    <button type="button" onclick="addSemester()">Add Semester</button>
+    <button type="submit">Calculate</button>
+  </form>
+  <div id="finalGPA"></div>
+  <div id="cumulativeGPA"></div>
+
+  <script>
+    let semesterCount = 0;
+
+    function addSemester() {
+      semesterCount++;
+      const semestersContainer = document.getElementById('semestersContainer');
+      const semesterDiv = document.createElement('div');
+      semesterDiv.innerHTML = `
+        <h2>Semester ${semesterCount}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${Array.from({ length: 14 }, (_, i) => `
+              <tr>
+                <td>Subject ${i + 1}</td>
+                <td><input type="text" name="sem${semesterCount}sub${i + 1}" ${i < 12 ? 'required' : ''}></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      semestersContainer.appendChild(semesterDiv);
+    }
+
+    document.getElementById('gradeForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      let cumulativeGrades = 0;
+      let cumulativeSubjects = 0;
+      let cumulativeGPA = '';
+
+      for (let sem = 1; sem <= semesterCount; sem++) {
+        let semesterGrades = 0;
+        let semesterSubjects = 0;
+
+        for (let sub = 1; sub <= 14; sub++) {
+          let grade = document.querySelector(`input[name="sem${sem}sub${sub}"]`).value;
+          if (grade) {
+            semesterGrades += parseFloat(grade);
+            semesterSubjects++;
+          }
+        }
+
+        if (semesterSubjects > 0) {
+          let semesterGPA = (semesterGrades / semesterSubjects);
+          cumulativeGrades += semesterGrades;
+          cumulativeSubjects += semesterSubjects;
+          cumulativeGPA += `Semester ${sem} GPA: ${(semesterGPA).toFixed(2)}%<br>`;
+        }
+      }
+
+      if (cumulativeSubjects > 0) {
+        let finalGPA = (cumulativeGrades / cumulativeSubjects);
+        document.getElementById('finalGPA').innerHTML = `Final Cumulative GPA: ${(finalGPA).toFixed(2)}%`;
+        document.getElementById('cumulativeGPA').innerHTML = cumulativeGPA;
+      } else {
+        document.getElementById('finalGPA').innerHTML = 'Please enter grades for at least one subject.';
+        document.getElementById('cumulativeGPA').innerHTML = '';
+      }
+    });
+
+    // Initialize with one semester
+    addSemester();
+  </script>
+</body>
+
+</html>
